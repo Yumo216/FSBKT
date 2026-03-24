@@ -13,7 +13,6 @@ def getDataLoader(batch_size, num_of_questions, max_step, fold_idx=None):
         reader.fold_idx = fold_idx
     train, vali, test = reader.getData()
 
-    # ---------- 统计 question_id 的最小值与最大值 ----------
     def extract_question_id_bounds(data):
         question_ids = []
         for seq in data:
@@ -38,7 +37,7 @@ def getDataLoader(batch_size, num_of_questions, max_step, fold_idx=None):
             print(f"Warning: dtrain at index {idx} is empty!")
         else:
             dtrain = torch.LongTensor(np.array(item).astype(float).tolist())
-            trainLoader.append(Data.DataLoader(dtrain, batch_size=C.BATCH_SIZE, shuffle=False))  # 之前是shuffle=True
+            trainLoader.append(Data.DataLoader(dtrain, batch_size=C.BATCH_SIZE, shuffle=False))
     dval = torch.LongTensor(vali.tolist())
     valiLoader = Data.DataLoader(dval, batch_size=C.BATCH_SIZE, shuffle=False)
     dtest = torch.LongTensor(test.tolist())

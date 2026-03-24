@@ -14,7 +14,7 @@ class GrapheEmbedding(nn.Module):
         self.node_features = node_features
         self.gnn_model = BipartiteGNN.BiGNN(emb_dim).to(device)
 
-        # learnable bias（可训练）
+        # learnable bias
         self.correct_bias = nn.Parameter(torch.randn(1, emb_dim, device=device) * 0.01)
         self.incorrect_bias = nn.Parameter(torch.randn(1, emb_dim, device=device) * 0.01)
 
@@ -22,7 +22,7 @@ class GrapheEmbedding(nn.Module):
         knowledge_emb = self.gnn_model(self.node_features, self.edge_index)
         ques_base = knowledge_emb[:self.Q]  # [Q, D]
 
-        # 构造结构感知的 interaction embedding
+        # interaction embedding
         wrong_emb = ques_base + self.incorrect_bias     # [Q, D]
         right_emb = ques_base + self.correct_bias       # [Q, D]
         padding = torch.zeros((1, self.emb_dim), device=self.device)

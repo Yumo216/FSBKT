@@ -1,5 +1,5 @@
-# FedProx 只影响本地训练（loss 加惩罚项），不改变聚合逻辑
-# 为了接口一致性，我们仍返回 FedAvg 聚合逻辑
+# FedProx only affects local training by adding a proximal regularization term to the loss.
+# We still return the FedAvg-style aggregation result for interface consistency.
 from .fedavg import fedavg
 
 def fedprox(w_locals, weights=None):

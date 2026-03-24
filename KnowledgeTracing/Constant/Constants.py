@@ -54,8 +54,8 @@ OUTPUT = QUES
 
 
 # Training
-LR = 0.001  # 固定模型后再调
+LR = 0.001
 EPOCH = 200
-K_fold = 5  # 五折交叉验证
+K_fold = 5
 
 

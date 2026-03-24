@@ -14,19 +14,19 @@ class GNNBias(nn.Module):
         self.S = C.SKILL
         self.gnn_model = BipartiteGNN.BiGNN(emb_dim).to(device)
 
-        # 构建图结构 edge_index（固定）
+        # Build the fixed graph structure: edge_index
         adj_matrix = pd.read_csv("../../KTDataset/ASSIST/adj_matrix.csv", index_col=0).values
         edge_index = np.array(np.nonzero(adj_matrix))
-        edge_index[1] += self.Q  # S 节点偏移
+        edge_index[1] += self.Q
         self.edge_index = torch.tensor(edge_index, dtype=torch.long).to(device)
 
-        # 构建节点初始特征
+        # Build initial node features.
         self.nodes_features = torch.cat([
             torch.eye(self.Q, emb_dim),
             torch.eye(self.S, emb_dim)
         ], dim=0).to(device)
 
-        # learnable bias（可训练）
+        # learnable bias
         self.correct_bias = nn.Parameter(torch.randn(1, emb_dim) * 0.01)
         self.incorrect_bias = nn.Parameter(torch.randn(1, emb_dim) * 0.01)
 
@@ -34,7 +34,7 @@ class GNNBias(nn.Module):
         knowledge_emb = self.gnn_model(self.nodes_features, self.edge_index)
         ques_base = knowledge_emb[:self.Q]  # [Q, D]
 
-        # 构造结构感知的 interaction embedding
+        # interaction embedding
         wrong_emb = ques_base + self.incorrect_bias     # [Q, D]
         right_emb = ques_base + self.correct_bias       # [Q, D]
         padding = torch.zeros((1, self.emb_dim), device=self.device)

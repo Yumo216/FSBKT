@@ -1,25 +1,30 @@
 import json
+from collections import defaultdict
+
 import numpy as np
 import torch
-from collections import defaultdict
+
 from KnowledgeTracing.Constant import Constants as C
 
-def build_graph(json_path):
-    # 模型&参数选择
-    mode = "normalize"  # 可选: "normalize", "binarize", "threshold", "topk"
-    threshold = 1       # 仅mode为"threshold"时有效
-    topk = 10           # 仅mode为"topk"时有效
 
-    with open(json_path, 'r') as f:
+def build_graph(json_path):
+    # Mode and hyperparameter selection
+    mode = "normalize"  # Options: "normalize", "binarize", "threshold", "topk"
+    threshold = 1  # Effective only when mode == "threshold"
+    topk = 10  # Effective only when mode == "topk"
+
+    with open(json_path, "r") as f:
         data = json.load(f)
-    # data = data[0:100]  # 如需采样可取消注释
+
+    # data = data[0:100]  # Uncomment this line if sampling is needed
 
     question_concepts = defaultdict(set)
     for item in data:
         qid = int(item["question_id"])
-        skills = str(item["skill"]).split(',')
-        question_concepts[qid].update(int(s) for s in skills if s != '')
-    Q = max(question_concepts.keys())  # 题号最大即题目个数（已编号）
+        skills = str(item["skill"]).split(",")
+        question_concepts[qid].update(int(s) for s in skills if s != "")
+
+    Q = max(question_concepts.keys())  # The maximum question ID is treated as the total number of indexed questions
 
     adj = np.zeros((Q, Q), dtype=float)
 
@@ -42,9 +47,10 @@ def build_graph(json_path):
                 mask[idx] = True
                 row[~mask] = 0
                 adj[i] = row
+
         row_sum = adj.sum(axis=1, keepdims=True) + 1e-8
         adj = adj / row_sum
-    else:  # 默认normalize
+    else:  # Default: normalize
         row_sum = adj.sum(axis=1, keepdims=True) + 1e-8
         adj = adj / row_sum
 

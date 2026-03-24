@@ -11,16 +11,13 @@ from Fed import FedAvg, Apply
 
 
 def performance(ground_truth, prediction):
-    # 转为 numpy
     y_true = ground_truth.detach().cpu().numpy()
     y_pred = prediction.detach().cpu().numpy()
 
-    # AUC & ACC
     fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)
     auc = metrics.auc(fpr, tpr)
     acc = metrics.accuracy_score(y_true, np.round(y_pred))
 
-    # RMSE
     rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
 
     print(f'auc: {auc:.4f}  acc: {acc:.4f}  rmse: {rmse:.4f}')
@@ -70,18 +67,18 @@ class lossFunc(nn.Module):
 def train_epoch(model, Loader, optimizer, loss_func, m_locals, device):
     w_locals = []
 
-    Init_w = copy.deepcopy(model.state_dict())  # 保存初始模型的权重
+    Init_w = copy.deepcopy(model.state_dict())
     E = 5
 
     print(f"Number of clients: {len(Loader)}")
 
-    for idx, trainLoader in enumerate(tqdm.tqdm(Loader, desc="Training clients", mininterval=2)):  # 每个 trainLoader 对应一个客户端的数据。
+    for idx, trainLoader in enumerate(tqdm.tqdm(Loader, desc="Training clients", mininterval=2)):
         # print(f"Now running client {idx + 1}")
 
         model.load_state_dict(Apply(Init_w, m_locals[Loader.index(trainLoader)]))
 
         loss = torch.tensor([], device=device)
-        for e in range(E):  # 在一次全局epoch下，每个客户端的epoch
+        for e in range(E):
             for batch in trainLoader:
                 batch = batch.to(device)
                 # shape of a batch:[batch_size, max_step, 3]
@@ -89,7 +86,7 @@ def train_epoch(model, Loader, optimizer, loss_func, m_locals, device):
 
                 logit = model(datas[1].squeeze(-1), datas[0].squeeze(-1))
 
-                loss, _, _ = loss_func(logit, datas)  # 正确解包返回的元组
+                loss, _, _ = loss_func(logit, datas)
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True)
                 optimizer.step()
@@ -116,7 +113,7 @@ def test_epoch(model, testLoader, loss_func, device):
     return performance(ground_truth, prediction)
 
 def calculate_data_ratios(Loader):
-    client_data_sizes = [len(trainLoader.dataset) for trainLoader in Loader]  # 获取每个客户端的数据大小
-    total_data_size = sum(client_data_sizes)  # 总数据量
-    data_ratios = [size / total_data_size for size in client_data_sizes]  # 计算比例
+    client_data_sizes = [len(trainLoader.dataset) for trainLoader in Loader]
+    total_data_size = sum(client_data_sizes)
+    data_ratios = [size / total_data_size for size in client_data_sizes]
     return data_ratios

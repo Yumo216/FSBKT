@@ -3,7 +3,7 @@ import torch
 @torch.no_grad()
 def fedproto(proto_locals, device=None, weights=None):
     """
-    FedProto: 聚合行为原型 (student_proto)
+    FedProto:
     Args:
         proto_locals: List[Tensor[K, D]]
     Returns:
