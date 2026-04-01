@@ -64,8 +64,9 @@ class DKT_GAT(nn.Module):
         student_proto_noisy = student_proto
 
         # Add noise to the behavior prototypes
-        # laplace_noise = torch.distributions.Laplace(0, scale=0.1).sample(student_proto.shape).to(student_proto.device)
-        # student_proto_noisy = student_proto + laplace_noise
+        student_proto = torch.clamp(student_proto, -1, 1)
+        laplace_noise = torch.distributions.Laplace(0, scale=0.1).sample(student_proto.shape).to(student_proto.device)
+        student_proto_noisy = student_proto + laplace_noise
 
         q_seq = q_seq.long()
         q_emb = base_emb[q_seq]  # [B, L, D] Retrieve the embeddings of the corresponding questions
