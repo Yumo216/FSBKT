@@ -25,6 +25,4 @@ For privacy evaluation (MIA / ReID):
 python mia+reid.py
 ```
 
-## Datasets
 
-The datasets will be released once the paper is accepted.
